@@ -109,7 +109,37 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    expanded_nodes = util.Counter()
+    priority_queue = util.PriorityQueue()
+    priority_queue.push([problem.getStartState(), []], 0)
+
+    while priority_queue.isEmpty() is False:
+        current_node, current_path = priority_queue.pop()
+        if problem.isGoalState(current_node):
+            break
+        expanded_nodes[current_node] = problem.getCostOfActions(current_path)
+        for expanded_node in problem.getSuccessors(current_node):
+            successor_node, action, _ = expanded_node
+            if successor_node in expanded_nodes:
+                cost = problem.getCostOfActions(current_path)
+                if expanded_nodes[successor_node] > cost:
+                    expanded_nodes[successor_node] = cost
+                    path = current_path + [action]
+                    f = problem.getCostOfActions(path)
+                    h = heuristic(successor_node, problem)
+                    priority_queue.push([successor_node, path], f + h)
+            else:
+                path = current_path + [action]
+                f = problem.getCostOfActions(path)
+                h = heuristic(successor_node, problem)
+                priority_queue.push([successor_node, path], f + h)
+    return current_path
+
+def hillClimbing(problem, heuristic):
+    pass
+
+def simulatedAnnealing(problem):
+    pass
 
 
 # Abbreviations
@@ -117,3 +147,5 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+hcl = hillClimbing
+san = simulatedAnnealing
