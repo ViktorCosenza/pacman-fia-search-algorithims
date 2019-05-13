@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,8 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+import random
+import math
 
 class SearchProblem:
     """
@@ -97,7 +99,29 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    expanded_nodes = util.Counter()
+    priority_queue = util.PriorityQueue()
+    priority_queue.push([problem.getStartState(), []], 0)
 
+    while priority_queue.isEmpty() is False:
+        current_node, current_path = priority_queue.pop()
+        if problem.isGoalState(current_node):
+            break
+        expanded_nodes[current_node] = problem.getCostOfActions(current_path)
+        for expanded_node in problem.getSuccessors(current_node):
+            successor_node, action, _ = expanded_node
+            if successor_node in expanded_nodes:
+                cost = problem.getCostOfActions(current_path)
+                if expanded_nodes[successor_node] > cost:
+                    expanded_nodes[successor_node] = cost
+                    path = current_path + [action]
+                    f = problem.getCostOfActions(path)
+                    priority_queue.push([successor_node, path], f)
+            else:
+                path = current_path + [action]
+                f = problem.getCostOfActions(path)
+                priority_queue.push([successor_node, path], f)
+    return current_path
 
 def nullHeuristic(state, problem=None):
     """
@@ -156,7 +180,39 @@ def hillClimbing(problem, heuristic):
 
 
 def simulatedAnnealing(problem):
-    pass
+    current_node = problem.getStartState()
+    action_current_node = []
+    actions = []
+    temperature = 1.0
+    alpha = 1.35
+
+    while True:
+        i = 0
+        queue = util.Queue()
+        for state, direction, cost in problem.getSuccessors(current_node):
+            path = [direction]
+            queue.push((state, path))
+            i += 1
+        neighbour = random.randint(0, i-1)
+        if neighbour > 0:
+            for j in range(0, neighbour+1):
+                successor_node, action = queue.pop()
+        else:
+            successor_node, action = queue.pop()
+        E = problem.getCostOfActions(action) - problem.getCostOfActions(action_current_node)
+        if E < 0:
+            current_node = successor_node
+            action_current_node = action
+            actions = actions + action_current_node
+        else:
+            if math.exp(-E/temperature):
+                current_node = successor_node
+                action_current_node = action
+                actions = actions + action_current_node
+        if problem.isGoalState(current_node):
+            return actions
+        temperature = temperature * alpha
+    return actions
 
 
 # Abbreviations
