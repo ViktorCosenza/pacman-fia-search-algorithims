@@ -97,7 +97,7 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -136,7 +136,24 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     return current_path
 
 def hillClimbing(problem, heuristic):
-    pass
+    priority_queue = util.PriorityQueue()
+    current_cost = heuristic(problem.getStartState(), problem)
+    priority_queue.push([problem.getStartState(), []], current_cost)
+    current_node, actions = priority_queue.pop()
+    while True:
+        for expanded_node in problem.getSuccessors(current_node):
+            successor, action, _ = expanded_node
+            node_cost = problem.getCostOfActions(actions + [action]) + heuristic(successor, problem)
+            priority_queue.push([successor, actions + [action]], node_cost)
+
+        current_node, actions = priority_queue.pop()
+        current_node_cost = heuristic(current_node, problem)
+        if problem.isGoalState(current_node) or current_node_cost > current_cost:
+            break
+        priority_queue = util.PriorityQueue()
+        current_cost = current_node_cost
+    return actions
+
 
 def simulatedAnnealing(problem):
     pass
